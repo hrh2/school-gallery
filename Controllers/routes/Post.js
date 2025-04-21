@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { Post } = require('../../Models/Post');
+const {verifyToken} = require("../middlewares/VerifyToken");
 
 // CREATE Post
-router.post('/', async (req, res) => {
+router.post('/',verifyToken, async (req, res) => {
     try {
         const { title, description, images_url = [], youtube_video = [] } = req.body;
 
@@ -47,7 +48,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // DELETE Post by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',verifyToken, async (req, res) => {
     try {
         const post = await Post.findByIdAndDelete(req.params.id);
         if (!post) return res.status(404).json({ error: 'Post not found' });

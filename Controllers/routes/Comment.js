@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Comment } = require('../../Models/Comment');
 const { Post } = require('../../Models/Post');
+const {verifyToken} = require("../middlewares/VerifyToken");
 
 // CREATE Comment and associate with a post
 router.post('/', async (req, res) => {
@@ -37,7 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 // DELETE a comment
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',verifyToken, async (req, res) => {
     try {
         const comment = await Comment.findByIdAndDelete(req.params.id);
         if (!comment) return res.status(404).json({ error: 'Comment not found' });
