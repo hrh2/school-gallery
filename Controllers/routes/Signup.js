@@ -56,11 +56,14 @@ router.post('/', async (req, res) => {
             // Save the user to the database
             await user.save();
 
+            const user_token_object = user.toObject();
+            user_token_object.password = "";
+
             // Generate JWT token
             const token = jwt.sign(
-                { _id: user._id, email: user.email, phone: user.phone ,role:user.role,image:user.image,name:user.firstName,isVerified:user.isVerified},
+                user_token_object,
                 process.env.JWT,
-                { expiresIn: '1h' } // Token expires in 1 hour
+                { expiresIn: '1h' }
             );
 
             return res.status(200).json({ token, message: 'Validation code sent. Check your email.' });

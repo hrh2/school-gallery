@@ -133,20 +133,15 @@ router.post('/email-updated', verifyToken, async (req, res) => {
         }
 
         // Generate a new token
+        const user_token_object = user.toObject();
+        user_token_object.password = "";
+
+        // Generate JWT token
         const token = jwt.sign(
-            {
-                _id: user._id,
-                email: user.email,
-                phone: user.phone,
-                role: user.role,
-                image: user.image,
-                name: user.firstName,
-                isVerified:user.isVerified
-            },
+            user_token_object,
             process.env.JWT,
             { expiresIn: '1h' }
         );
-
         return res.status(201).json({ message: "success", token:token });
 
     } catch (err) {
