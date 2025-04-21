@@ -48,8 +48,8 @@ app.use(cors());
 app.use(morgan('combined'));
 
 // Routes
-app.use(postRouter);
-app.use(commentRouter);
+app.use('/posts',postRouter);
+app.use('/comments',commentRouter);
 app.use(userRouter);
 app.use('/login', loginRouter);
 app.use('/register', signUpRouter);

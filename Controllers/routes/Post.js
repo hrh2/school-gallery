@@ -2,21 +2,31 @@ const express = require('express');
 const router = express.Router();
 const { Post } = require('../../Models/Post');
 const {verifyToken} = require("../middlewares/VerifyToken");
+const {uploadToCloudinary} = require("../../utils/cloudinaryUploader");
 
 // CREATE Post
 router.post('/',verifyToken, async (req, res) => {
     try {
-        const { title, description, images_url = [], youtube_video = [] } = req.body;
+        const { title, description, images = [], youtube_video = [] } = req.body;
 
         if (!title || typeof title !== 'string' || !title.trim()) {
             return res.status(400).json({ error: 'Valid post title is required' });
         }
 
+        // Upload each image to Cloudinary and get URL
+        const imageUploadPromises = images.map(async (image, index) => {
+            const result = await uploadToCloudinary(image, `post_image_${Date.now()}_${index}`);
+            return result.url; // Only keep the URL
+        });
+
+        const uploadedImageUrls = await Promise.all(imageUploadPromises);
+
+        // Create the post
         const post = new Post({
             title: title.trim(),
             description: description?.trim(),
-            images_url: images_url.map(img => img.trim()),
-            youtube_video: youtube_video.map(video => video.trim())
+            images_url: uploadedImageUrls,
+            youtube_video: youtube_video.map(v => v.trim())
         });
 
         await post.save();
@@ -25,6 +35,7 @@ router.post('/',verifyToken, async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
 
 // GET All Posts (with populated comments)
 router.get('/', async (req, res) => {
